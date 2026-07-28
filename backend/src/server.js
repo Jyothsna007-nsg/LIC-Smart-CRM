@@ -5,9 +5,11 @@ require("dotenv").config();
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
+// MySQL Connection
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -21,6 +23,15 @@ db.connect((err) => {
     return;
   }
   console.log("MySQL Connected ✅");
+});
+
+// Health Check API
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "OK",
+    message: "LIC Smart CRM Backend Running",
+    time: new Date(),
+  });
 });
 
 // Get all customers
@@ -41,13 +52,16 @@ app.post("/api/customers", (req, res) => {
   db.query(sql, [name, phone, email, policyType], (err, result) => {
     if (err) return res.status(500).json(err);
 
-    res.json({
-      message: "Customer added successfully",
-      id: result.insertId,
-    });
+    ```
+res.json({
+  message: "Customer added successfully",
+  id: result.insertId,
+});
+```;
   });
 });
 
+// Start Server
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {

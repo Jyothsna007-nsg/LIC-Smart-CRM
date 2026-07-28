@@ -48,7 +48,6 @@ try {
           </div>{" "}
         </div>{" "}
       </div>
-      ```
       <div className="form-wrapper">
         <div className="form-card">
           <div className="form-header">
