@@ -2,115 +2,118 @@ import { useState } from "react";
 import api from "../services/api";
 import "./AddCustomer.css";
 
-export default function AddCustomer() {
-  const [form, setForm] = useState({
+function AddCustomer() {
+  const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
-    policyType: "",
+    policy_number: "",
+    premium_amount: "",
   });
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()```
-try {
-  await api.post('/customers', form)
+    e.preventDefault();
 
-  alert('Customer Added Successfully ✅')
+    try {
+      await api.post("/customers", formData);
 
-  setForm({
-    name: '',
-    phone: '',
-    email: '',
-    policyType: ''
-  })
-} catch (error) {
-  console.error(error)
-  alert('Failed to add customer ❌')
-}
-```;
+      alert("Customer added successfully!");
+
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        policy_number: "",
+        premium_amount: "",
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Error adding customer");
+    }
   };
 
   return (
-    <div className="page-container">
-      {" "}
-      <div className="navbar">
-        {" "}
-        <div className="logo-section">
-          {" "}
-          <div className="logo-circle">LIC</div>{" "}
-          <div>
-            {" "}
-            <h1>LIC Smart CRM</h1> <p>Customer Relationship Management</p>{" "}
-          </div>{" "}
-        </div>{" "}
+    <div className="lic-page">
+      {/* Header */}
+      <div className="lic-header">
+        <div className="lic-logo">LIC</div>
+
+        <div className="lic-title">
+          <h1>LIC Smart CRM</h1>
+          <p>Customer Relationship Management</p>
+        </div>
       </div>
-      <div className="form-wrapper">
-        <div className="form-card">
-          <div className="form-header">
-            <h2>Add New Customer</h2>
-            <p>Register LIC customer details securely</p>
-          </div>
 
-          <form onSubmit={handleSubmit} className="customer-form">
-            <div className="input-group">
-              <label>Customer Name</label>
-              <input
-                type="text"
-                name="name"
-                placeholder="Enter customer name"
-                value={form.name}
-                onChange={handleChange}
-                required
-              />
-            </div>
+      {/* Form */}
+      <div className="lic-form-section">
+        <div className="lic-form-card">
+          <h2>Add New Customer</h2>
+          <p>Register LIC customer details securely</p>
 
-            <div className="input-group">
-              <label>Phone Number</label>
-              <input
-                type="text"
-                name="phone"
-                placeholder="Enter mobile number"
-                value={form.phone}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          <form onSubmit={handleSubmit}>
+            <label>Customer Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter customer name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
 
-            <div className="input-group">
-              <label>Email Address</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="Enter email address"
-                value={form.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <label>Phone Number</label>
+            <input
+              type="text"
+              name="phone"
+              placeholder="Enter mobile number"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+            />
 
-            <div className="input-group">
-              <label>Policy Type</label>
-              <select
-                name="policyType"
-                value={form.policyType}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Policy</option>
-                <option value="LIC Jeevan Anand">LIC Jeevan Anand</option>
-                <option value="LIC New Endowment Plan">
-                  LIC New Endowment Plan
-                </option>
-                <option value="LIC Tech Term">LIC Tech Term</option>
-                <option value="LIC Jeevan Labh">LIC Jeevan Labh</option>
-              </select>
-            </div>
+            <label>Email Address</label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter email address"
+              value={formData.email}
+              onChange={handleChange}
+            />
 
-            <button type="submit" className="submit-btn">
+            <label>Policy Type</label>
+            <select
+              name="policy_number"
+              value={formData.policy_number}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Policy</option>
+              <option value="Jeevan Anand">Jeevan Anand</option>
+              <option value="Jeevan Umang">Jeevan Umang</option>
+              <option value="Jeevan Labh">Jeevan Labh</option>
+              <option value="New Endowment Plan">New Endowment Plan</option>
+              <option value="Money Back Policy">Money Back Policy</option>
+              <option value="Term Insurance">Term Insurance</option>
+              <option value="Child Future Plan">Child Future Plan</option>
+            </select>
+
+            <label>Premium Amount</label>
+            <input
+              type="number"
+              name="premium_amount"
+              placeholder="Enter premium amount"
+              value={formData.premium_amount}
+              onChange={handleChange}
+            />
+
+            <button type="submit" className="lic-save-btn">
               Save Customer
             </button>
           </form>
@@ -119,3 +122,5 @@ try {
     </div>
   );
 }
+
+export default AddCustomer;

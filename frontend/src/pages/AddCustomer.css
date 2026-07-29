@@ -1,148 +1,160 @@
-.page-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%);
+/* ===== LIC SMART CRM DESIGN ===== */
+
+body {
+  margin: 0;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.navbar {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(10px);
-  padding: 18px 40px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+.lic-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #081f4a 0%, #0b2f73 45%, #1e4fbf 100%);
 }
 
-.logo-section {
+/* Header */
+.lic-header {
+  background: #0056b3;
+  height: 120px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  color: white;
+  padding: 0 50px;
+  gap: 24px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
-.logo-circle {
-  width: 56px;
-  height: 56px;
+.lic-logo {
+  width: 72px;
+  height: 72px;
+  background: #ffd200;
   border-radius: 50%;
-  background: linear-gradient(135deg, #facc15, #f59e0b);
-  color: #0f172a;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   font-weight: 800;
-  font-size: 1rem;
-  box-shadow: 0 8px 24px rgba(250, 204, 21, 0.35);
-}
-
-.logo-section h1 {
-  margin: 0;
   font-size: 1.5rem;
+  color: #001f5c;
+  box-shadow: 0 4px 12px rgba(255, 210, 0, 0.4);
 }
 
-.logo-section p {
-  margin: 2px 0 0;
-  opacity: 0.8;
-  font-size: 0.9rem;
+.lic-title h1 {
+  margin: 0;
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
-.form-wrapper {
+.lic-title p {
+  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+}
+
+/* Form Section */
+.lic-form-section {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 48px 20px;
+  padding: 50px 20px 80px;
 }
 
-.form-card {
+.lic-form-card {
   width: 100%;
-  max-width: 520px;
-  background: rgba(255, 255, 255, 0.12);
+  max-width: 620px;
+  background: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 24px;
-  padding: 36px;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 28px;
+  padding: 48px 42px;
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.28);
 }
 
-.form-header {
-  text-align: center;
-  margin-bottom: 28px;
-  color: white;
-}
-
-.form-header h2 {
+.lic-form-card h2 {
   margin: 0;
-  font-size: 2rem;
+  text-align: center;
+  font-size: 2.4rem;
+  color: white;
+  font-weight: 700;
 }
 
-.form-header p {
-  margin-top: 8px;
-  opacity: 0.8;
-}
-
-.customer-form {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.input-group label {
-  color: #e2e8f0;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.input-group input,
-.input-group select {
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.92);
+.lic-form-card p {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 10px 0 34px;
   font-size: 1rem;
-  outline: none;
-  transition: all 0.25s ease;
 }
 
-.input-group input:focus,
-.input-group select:focus {
-  border-color: #facc15;
-  box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.2);
+.lic-form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.lic-form-card label {
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.lic-form-card input,
+.lic-form-card select {
+  width: 100%;
+  padding: 16px 18px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  font-size: 1rem;
+  color: #0a2e5c;
+  outline: none;
+  box-sizing: border-box;
+  transition: 0.25s ease;
+}
+
+.lic-form-card input:focus,
+.lic-form-card select:focus {
+  box-shadow: 0 0 0 4px rgba(255, 210, 0, 0.35);
   transform: translateY(-1px);
 }
 
-.submit-btn {
+.lic-form-card input::placeholder {
+  color: #6b7280;
+}
+
+.lic-save-btn {
+  width: 100%;
   margin-top: 10px;
-  padding: 14px;
+  padding: 16px;
   border: none;
   border-radius: 14px;
-  background: linear-gradient(135deg, #facc15, #f59e0b);
-  color: #0f172a;
-  font-size: 1rem;
+  background: linear-gradient(90deg, #ffd200, #ffb300);
+  color: #001f5c;
+  font-size: 1.08rem;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 24px rgba(255, 210, 0, 0.35);
 }
 
-.submit-btn:hover {
+.lic-save-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(250, 204, 21, 0.35);
+  box-shadow: 0 14px 32px rgba(255, 210, 0, 0.45);
 }
 
-@media (max-width: 640px) {
-  .navbar {
-    padding: 16px 20px;
+/* Responsive */
+@media (max-width: 768px) {
+  .lic-header {
+    padding: 20px;
+    height: auto;
   }
 
-  .form-card {
-    padding: 28px 22px;
+  .lic-title h1 {
+    font-size: 1.5rem;
   }
 
-  .form-header h2 {
-    font-size: 1.7rem;
+  .lic-form-card {
+    padding: 32px 24px;
+  }
+
+  .lic-form-card h2 {
+    font-size: 2rem;
   }
 }
