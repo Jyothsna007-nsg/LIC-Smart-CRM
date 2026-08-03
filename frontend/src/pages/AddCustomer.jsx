@@ -7,6 +7,7 @@ function AddCustomer() {
     name: "",
     phone: "",
     email: "",
+    policy_type: "Jeevan Labh",
     policy_number: "",
     premium_amount: "",
   });
@@ -22,14 +23,15 @@ function AddCustomer() {
     e.preventDefault();
 
     try {
-      await api.post("/customers", formData);
+      const response = await api.post("/customers", formData);
 
-      alert("Customer added successfully!");
+      alert(response.data.message || "Customer added successfully!");
 
       setFormData({
         name: "",
         phone: "",
         email: "",
+        policy_type: "Jeevan Labh",
         policy_number: "",
         premium_amount: "",
       });
@@ -41,7 +43,6 @@ function AddCustomer() {
 
   return (
     <div className="lic-page">
-      {/* Header */}
       <div className="lic-header">
         <div className="lic-logo">LIC</div>
 
@@ -51,7 +52,6 @@ function AddCustomer() {
         </div>
       </div>
 
-      {/* Form */}
       <div className="lic-form-section">
         <div className="lic-form-card">
           <h2>Add New Customer</h2>
@@ -89,20 +89,29 @@ function AddCustomer() {
 
             <label>Policy Type</label>
             <select
-              name="policy_number"
-              value={formData.policy_number}
+              name="policy_type"
+              value={formData.policy_type}
               onChange={handleChange}
               required
             >
-              <option value="">Select Policy</option>
+              <option value="Jeevan Labh">Jeevan Labh</option>
               <option value="Jeevan Anand">Jeevan Anand</option>
               <option value="Jeevan Umang">Jeevan Umang</option>
-              <option value="Jeevan Labh">Jeevan Labh</option>
               <option value="New Endowment Plan">New Endowment Plan</option>
               <option value="Money Back Policy">Money Back Policy</option>
               <option value="Term Insurance">Term Insurance</option>
-              <option value="Child Future Plan">Child Future Plan</option>
             </select>
+
+            {/* NEW POLICY NUMBER FIELD */}
+            <label>Policy Number</label>
+            <input
+              type="text"
+              name="policy_number"
+              placeholder="Enter policy number"
+              value={formData.policy_number}
+              onChange={handleChange}
+              required
+            />
 
             <label>Premium Amount</label>
             <input

@@ -5,6 +5,7 @@ require("dotenv").config({ path: __dirname + "/../.env" });
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
@@ -16,6 +17,7 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
+// Connect to MySQL
 db.connect((err) => {
   if (err) {
     console.error("❌ MySQL connection failed:", err.message);
@@ -24,12 +26,16 @@ db.connect((err) => {
   }
 });
 
-// Home route
+// ---------------------------------------------------
+// Home Route
+// ---------------------------------------------------
 app.get("/", (req, res) => {
   res.send("LIC Smart CRM Backend Running 🚀");
 });
 
-// Test API route
+// ---------------------------------------------------
+// Test API
+// ---------------------------------------------------
 app.get("/api/test", (req, res) => {
   res.json({
     success: true,
@@ -37,32 +43,45 @@ app.get("/api/test", (req, res) => {
   });
 });
 
-// Get all customers
+// ---------------------------------------------------
+// Get All Customers
+// ---------------------------------------------------
 app.get("/api/customers", (req, res) => {
-  db.query("SELECT * FROM customers", (err, result) => {
+  const sql = "SELECT * FROM customers ORDER BY id DESC";
+
+  db.query(sql, (err, result) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      console.error("Fetch Error:", err);
+      return res.status(500).json({
+        success: false,
+        error: err.message,
+      });
     }
 
     res.json(result);
   });
 });
 
-// Add customer
+// ---------------------------------------------------
+// Add Customer
+// ---------------------------------------------------
+// Add Customer
 app.post("/api/customers", (req, res) => {
-  const { name, phone, email, policy_number, premium_amount } = req.body;
+  const { name, phone, email, policy_type, policy_number, premium_amount } =
+    req.body;
 
   const sql = `
     INSERT INTO customers
-    (name, phone, email, policy_number, premium_amount)
-    VALUES (?, ?, ?, ?, ?)
+    (name, phone, email, policy_type, policy_number, premium_amount)
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
   db.query(
     sql,
-    [name, phone, email, policy_number, premium_amount],
+    [name, phone, email, policy_type, policy_number, premium_amount],
     (err, result) => {
       if (err) {
+        console.error("Insert Error:", err);
         return res.status(500).json({ error: err.message });
       }
 
@@ -75,13 +94,22 @@ app.post("/api/customers", (req, res) => {
   );
 });
 
-// Delete customer
+// ---------------------------------------------------
+// Delete Customer
+// ---------------------------------------------------
 app.delete("/api/customers/:id", (req, res) => {
   const { id } = req.params;
 
-  db.query("DELETE FROM customers WHERE id = ?", [id], (err, result) => {
+  const sql = "DELETE FROM customers WHERE id = ?";
+
+  db.query(sql, [id], (err, result) => {
     if (err) {
-      return res.status(500).json({ error: err.message });
+      console.error("Delete Error:", err);
+
+      return res.status(500).json({
+        success: false,
+        error: err.message,
+      });
     }
 
     if (result.affectedRows === 0) {
@@ -98,8 +126,11 @@ app.delete("/api/customers/:id", (req, res) => {
   });
 });
 
+// ---------------------------------------------------
+// Start Server
+// ---------------------------------------------------
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
