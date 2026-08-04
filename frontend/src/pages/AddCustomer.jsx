@@ -7,9 +7,6 @@ function AddCustomer() {
     name: "",
     phone: "",
     email: "",
-    policy_type: "Jeevan Labh",
-    policy_number: "",
-    premium_amount: "",
   });
 
   const handleChange = (e) => {
@@ -23,108 +20,104 @@ function AddCustomer() {
     e.preventDefault();
 
     try {
-      const response = await api.post("/customers", formData);
+      await api.post("/customers", formData);
 
-      alert(response.data.message || "Customer added successfully!");
+      alert("Customer added successfully!");
 
       setFormData({
         name: "",
         phone: "",
         email: "",
-        policy_type: "Jeevan Labh",
-        policy_number: "",
-        premium_amount: "",
       });
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       alert("Error adding customer");
     }
   };
 
   return (
-    <div className="lic-page">
-      <div className="lic-header">
-        <div className="lic-logo">LIC</div>
-
-        <div className="lic-title">
-          <h1>LIC Smart CRM</h1>
-          <p>Customer Relationship Management</p>
-        </div>
+    <div className="add-customer-page">
+      <div className="page-header">
+        <p className="breadcrumb">Customers Add Customer</p>
+        <h1>Add New Customer</h1>
+        <p className="subtitle">Enter customer details to get started</p>
       </div>
 
-      <div className="lic-form-section">
-        <div className="lic-form-card">
-          <h2>Add New Customer</h2>
-          <p>Register LIC customer details securely</p>
+      <div className="customer-layout">
+        <div className="lic-info-card">
+          <div className="lic-icon">🛡️</div>
+          <h3>Customer First</h3>
+          <p>
+            Accurate customer information helps us serve better and build
+            stronger relationships.
+          </p>
 
-          <form onSubmit={handleSubmit}>
-            <label>Customer Name</label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter customer name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+          <div className="lic-footer-text">
+            <span>Har Pal Aapke Saath</span>
+            <small>Zindagi ke saath bhi, Zindagi ke baad bhi.</small>
+          </div>
+        </div>
 
-            <label>Phone Number</label>
-            <input
-              type="text"
-              name="phone"
-              placeholder="Enter mobile number"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-            />
+        <div className="customer-form-card">
+          <div className="form-badge">+</div>
 
-            <label>Email Address</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter email address"
-              value={formData.email}
-              onChange={handleChange}
-            />
+          <h2>Customer Information</h2>
 
-            <label>Policy Type</label>
-            <select
-              name="policy_type"
-              value={formData.policy_type}
-              onChange={handleChange}
-              required
-            >
-              <option value="Jeevan Labh">Jeevan Labh</option>
-              <option value="Jeevan Anand">Jeevan Anand</option>
-              <option value="Jeevan Umang">Jeevan Umang</option>
-              <option value="New Endowment Plan">New Endowment Plan</option>
-              <option value="Money Back Policy">Money Back Policy</option>
-              <option value="Term Insurance">Term Insurance</option>
-            </select>
+          <form onSubmit={handleSubmit} className="customer-form">
+            <div className="form-group">
+              <label>Customer Name *</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter full name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-            {/* NEW POLICY NUMBER FIELD */}
-            <label>Policy Number</label>
-            <input
-              type="text"
-              name="policy_number"
-              placeholder="Enter policy number"
-              value={formData.policy_number}
-              onChange={handleChange}
-              required
-            />
+            <div className="form-group">
+              <label>Phone Number *</label>
+              <input
+                type="text"
+                name="phone"
+                placeholder="Enter 10 digit mobile number"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-            <label>Premium Amount</label>
-            <input
-              type="number"
-              name="premium_amount"
-              placeholder="Enter premium amount"
-              value={formData.premium_amount}
-              onChange={handleChange}
-            />
+            <div className="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter email address"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
 
-            <button type="submit" className="lic-save-btn">
-              Save Customer
-            </button>
+            <div className="button-group">
+              <button
+                type="button"
+                className="reset-btn"
+                onClick={() =>
+                  setFormData({
+                    name: "",
+                    phone: "",
+                    email: "",
+                  })
+                }
+              >
+                Reset
+              </button>
+
+              <button type="submit" className="save-btn">
+                Save Customer
+              </button>
+            </div>
           </form>
         </div>
       </div>
