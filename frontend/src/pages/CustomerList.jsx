@@ -13,6 +13,18 @@ function CustomerList() {
     fetchCustomers();
   }, []);
 
+  const deletePolicy = async (id) => {
+    if (!window.confirm("Delete this policy?")) return;
+
+    try {
+      await api.delete(`/policies/${id}`);
+
+      setCustomerPolicies((prev) => prev.filter((policy) => policy.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchCustomers = async () => {
     try {
       const response = await api.get("/customers");
@@ -154,6 +166,7 @@ function CustomerList() {
                   customer={selectedCustomer}
                   policies={customerPolicies}
                   onClose={() => setSelectedCustomer(null)}
+                  onDeletePolicy={deletePolicy}
                 />
               )}
             </tbody>

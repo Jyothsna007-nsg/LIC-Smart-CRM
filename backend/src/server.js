@@ -176,7 +176,7 @@ app.get("/api/policies", (req, res) => {
 // Get Policies of a Specific Customer
 // ---------------------------------------------------
 app.get("/api/customers/:id/policies", (req, res) => {
-  const { id } = req.params;
+  const customerId = req.params.id;
 
   const sql = `
     SELECT * FROM policies
@@ -184,10 +184,9 @@ app.get("/api/customers/:id/policies", (req, res) => {
     ORDER BY id DESC
   `;
 
-  db.query(sql, [id], (err, result) => {
+  db.query(sql, [customerId], (err, result) => {
     if (err) {
-      console.error("Policy Fetch Error:", err);
-
+      console.error(err);
       return res.status(500).json({
         success: false,
         error: err.message,
@@ -197,7 +196,6 @@ app.get("/api/customers/:id/policies", (req, res) => {
     res.json(result);
   });
 });
-
 // ---------------------------------------------------
 // Add Policy
 // ---------------------------------------------------
