@@ -1,0 +1,83 @@
+.top-header {
+  height: 76px;
+  background: white;
+  border-bottom: 1px solid #e7ebf1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+}
+
+.breadcrumb {
+  margin: 0 0 2px;
+  color: #8a96a8;
+  font-size: 11px;
+}
+
+.top-header h1 {
+  margin: 0;
+  font-size: 22px;
+  color: #14253d;
+  font-weight: 700;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.header-search input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 13px;
+}
+
+.icon-button {
+  position: relative;
+  border: none;
+  background: transparent;
+  color: #526176;
+  cursor: pointer;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 6px;
+  background: #e31e24;
+  border-radius: 50%;
+}
+
+.quick-add {
+  border: none;
+  background: #174f91;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.quick-add:hover {
+  background: #123f74;
+}
+
+.header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e31e24;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}

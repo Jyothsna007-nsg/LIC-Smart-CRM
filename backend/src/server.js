@@ -173,6 +173,42 @@ app.get("/api/policies", (req, res) => {
 });
 
 // ---------------------------------------------------
+// Get All Premiums
+// ---------------------------------------------------
+app.get("/api/premiums", (req, res) => {
+  const sql = `
+    SELECT
+      p.id,
+      p.policy_number,
+      p.policy_type,
+      p.premium_amount,
+      p.start_date,
+      p.status,
+      c.name AS customer_name
+    FROM policies p
+    JOIN customers c
+      ON p.customer_id = c.id
+    ORDER BY p.id DESC
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error("Premiums Fetch Error:", err);
+
+      return res.status(500).json({
+        success: false,
+        error: err.message,
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  });
+});
+
+// ---------------------------------------------------
 // Get Policies of a Specific Customer
 // ---------------------------------------------------
 app.get("/api/customers/:id/policies", (req, res) => {
@@ -229,6 +265,50 @@ app.post("/api/policies", (req, res) => {
 });
 
 // ---------------------------------------------------
+// Update a Policy
+// ---------------------------------------------------
+app.put("/api/policies/:id", (req, res) => {
+  const { id } = req.params;
+  const { policy_number, policy_type, premium_amount, status } = req.body;
+
+  const sql = `
+    UPDATE policies
+    SET
+      policy_number = ?,
+      policy_type = ?,
+      premium_amount = ?,
+      status = ?
+    WHERE id = ?
+  `;
+
+  db.query(
+    sql,
+    [policy_number, policy_type, premium_amount, status, id],
+    (err, result) => {
+      if (err) {
+        console.error("Update Policy Error:", err);
+
+        return res.status(500).json({
+          success: false,
+          error: err.message,
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Policy not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Policy updated successfully",
+      });
+    },
+  );
+});
+// ---------------------------------------------------
 // Delete a Particular Policy
 // ---------------------------------------------------
 app.delete("/api/policies/:id", (req, res) => {
@@ -258,6 +338,140 @@ app.delete("/api/policies/:id", (req, res) => {
       message: "Policy deleted successfully",
     });
   });
+});
+
+// ===================================================
+// DASHBOARD APIs
+// ===================================================
+
+// ---------------------------------------------------
+// Get Dashboard Statistics
+// ---------------------------------------------------
+app.get("/api/dashboard/stats", (req, res) => {
+  const sql = `
+    SELECT
+      (SELECT COUNT(*) FROM customers) AS total_customers,
+
+      (SELECT COUNT(*)
+       FROM policies
+       WHERE status = 'ACTIVE') AS active_policies,
+
+      (SELECT COALESCE(SUM(premium_amount), 0)
+       FROM policies
+       WHERE MONTH(start_date) = MONTH(CURDATE())
+       AND YEAR(start_date) = YEAR(CURDATE())) AS premium_this_month,
+
+      (SELECT COUNT(*)
+       FROM policies
+       WHERE status != 'ACTIVE'
+          OR status IS NULL) AS pending_premiums
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error("Dashboard Stats Error:", err);
+
+      return res.status(500).json({
+        success: false,
+        error: err.message,
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result[0],
+    });
+  });
+});
+
+// ===================================================
+// PREMIUM PAYMENTS APIs
+// ===================================================
+
+// ---------------------------------------------------
+// Get All Premium Payments
+// ---------------------------------------------------
+app.get("/api/premium-payments", (req, res) => {
+  const sql = `
+    SELECT
+      pp.id,
+      pp.policy_id,
+      pp.amount,
+      pp.due_date,
+      pp.paid_date,
+      pp.payment_status,
+      p.policy_number,
+      p.policy_type,
+      c.name AS customer_name
+    FROM premium_payments pp
+    JOIN policies p
+      ON pp.policy_id = p.id
+    JOIN customers c
+      ON p.customer_id = c.id
+    ORDER BY pp.due_date ASC
+  `;
+
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error("Premium Payments Fetch Error:", err);
+
+      return res.status(500).json({
+        success: false,
+        error: err.message,
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  });
+});
+
+// ---------------------------------------------------
+// Add Premium Payment
+// ---------------------------------------------------
+app.post("/api/premium-payments", (req, res) => {
+  const { policy_id, amount, due_date, paid_date, payment_status } = req.body;
+
+  const sql = `
+    INSERT INTO premium_payments
+    (
+      policy_id,
+      amount,
+      due_date,
+      paid_date,
+      payment_status
+    )
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    sql,
+    [
+      policy_id,
+      amount,
+      due_date,
+      paid_date || null,
+      payment_status || "PENDING",
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Add Premium Payment Error:", err);
+
+        return res.status(500).json({
+          success: false,
+          error: err.message,
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Premium payment added successfully",
+        id: result.insertId,
+      });
+    },
+  );
 });
 
 // ===================================================
