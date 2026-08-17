@@ -255,3 +255,163 @@
     padding: 24px;
   }
 }
+/* ===================================================
+   EDIT CUSTOMER MODAL
+   =================================================== */
+
+.edit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.edit-modal {
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.edit-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e7ebf1;
+}
+
+.edit-modal-header h2 {
+  margin: 0 0 5px;
+  color: #14253d;
+  font-size: 20px;
+}
+
+.edit-modal-header p {
+  margin: 0;
+  color: #718096;
+  font-size: 13px;
+}
+
+.close-edit-modal {
+  border: none;
+  background: transparent;
+  color: #718096;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close-edit-modal:hover {
+  color: #14253d;
+}
+
+.edit-customer-form {
+  padding: 24px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 7px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #d9e0e8;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+  color: #14253d;
+}
+
+.form-group input:focus {
+  border-color: #174f91;
+  box-shadow: 0 0 0 3px rgba(23, 79, 145, 0.08);
+}
+
+.edit-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.edit-modal-footer button {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-modal-footer button[type="button"] {
+  background: #f1f3f6;
+  color: #4a5870;
+}
+
+.edit-modal-footer button[type="submit"] {
+  background: #174f91;
+  color: white;
+}
+
+.edit-modal-footer button[type="submit"]:hover {
+  background: #123f74;
+}
+
+.edit-modal-footer button[type="button"]:hover {
+  background: #e5e8ed;
+}
+
+/* Edit button */
+
+.edit-btn {
+  border: none;
+  background: #edf3fb;
+  color: #174f91;
+  padding: 7px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background: #dce9f8;
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .edit-modal {
+    max-width: 100%;
+  }
+
+  .edit-modal-header,
+  .edit-customer-form {
+    padding: 18px;
+  }
+
+  .edit-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .edit-modal-footer button {
+    width: 100%;
+  }
+}

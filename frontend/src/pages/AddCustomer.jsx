@@ -19,8 +19,40 @@ function AddCustomer() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const name = formData.name.trim();
+    const phone = formData.phone.trim();
+    const email = formData.email.trim();
+
+    // Name validation
+    if (name.length < 3) {
+      alert("Customer name must be at least 3 characters");
+      return;
+    }
+
+    // Name should contain only letters and spaces
+    if (!/^[A-Za-z ]+$/.test(name)) {
+      alert("Customer name should contain only letters and spaces");
+      return;
+    }
+
+    // Phone validation
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      alert("Please enter a valid 10-digit Indian mobile number");
+      return;
+    }
+
+    // Email validation
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
     try {
-      await api.post("/customers", formData);
+      await api.post("/customers", {
+        name,
+        phone,
+        email,
+      });
 
       alert("Customer added successfully!");
 
@@ -30,8 +62,9 @@ function AddCustomer() {
         email: "",
       });
     } catch (error) {
-      console.error(error);
-      alert("Error adding customer");
+      console.error("Add Customer Error:", error);
+
+      alert(error.response?.data?.error || "Error adding customer");
     }
   };
 
@@ -72,6 +105,7 @@ function AddCustomer() {
                 placeholder="Enter full name"
                 value={formData.name}
                 onChange={handleChange}
+                maxLength="100"
                 required
               />
             </div>
@@ -79,11 +113,13 @@ function AddCustomer() {
             <div className="form-group">
               <label>Phone Number *</label>
               <input
-                type="text"
+                type="tel"
                 name="phone"
                 placeholder="Enter 10 digit mobile number"
                 value={formData.phone}
                 onChange={handleChange}
+                maxLength="10"
+                inputMode="numeric"
                 required
               />
             </div>
@@ -96,6 +132,7 @@ function AddCustomer() {
                 placeholder="Enter email address"
                 value={formData.email}
                 onChange={handleChange}
+                maxLength="100"
               />
             </div>
 

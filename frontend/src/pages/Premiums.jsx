@@ -2,17 +2,57 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import "./Premiums.css";
 
+const formatDate = (date) => {
+  if (!date) return "-";
+
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+};
+
+const getPaymentStatus = (payment) => {
+  if (payment.payment_status === "PAID") {
+    return "PAID";
+  }
+
+  if (payment.payment_status === "PENDING" && payment.due_date) {
+    const today = new Date();
+    const dueDate = new Date(payment.due_date);
+
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+
+    if (dueDate < today) {
+      return "OVERDUE";
+    }
+  }
+
+  return payment.payment_status || "PENDING";
+};
+
 function Premiums() {
-  const [premiums, setPremiums] = useState([]);
   const [policies, setPolicies] = useState([]);
   const [payments, setPayments] = useState([]);
+  const totalCollected = payments
+    .filter((payment) => getPaymentStatus(payment) === "PAID")
+    .reduce((total, payment) => total + Number(payment.amount || 0), 0);
 
+  const pendingPayments = payments.filter(
+    (payment) => getPaymentStatus(payment) === "PENDING",
+  ).length;
+
+  const overduePayments = payments.filter(
+    (payment) => getPaymentStatus(payment) === "OVERDUE",
+  ).length;
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
-
+  const [editingPayment, setEditingPayment] = useState(null);
   const [paymentForm, setPaymentForm] = useState({
     policy_id: "",
     amount: "",
@@ -47,7 +87,6 @@ function Premiums() {
       const response = await api.get("/premiums");
 
       if (response.data.success) {
-        setPremiums(response.data.data);
       }
     } catch (err) {
       console.error("Premiums Fetch Error:", err);
@@ -65,25 +104,54 @@ function Premiums() {
       }
     } catch (err) {
       console.error("Payments Fetch Error:", err);
+    } finally {
+      setLoading(false);
     }
   };
-
   // ---------------------------------------------------
   // Add Payment
   // ---------------------------------------------------
   const handleAddPayment = async (e) => {
     e.preventDefault();
 
+    if (Number(paymentForm.amount) <= 0) {
+      alert("Payment amount must be greater than ₹0");
+      return;
+    }
+
+    if (paymentForm.payment_status === "PAID" && !paymentForm.paid_date) {
+      alert("Please select the paid date");
+      return;
+    }
+
+    const paymentData = {
+      ...paymentForm,
+      paid_date:
+        paymentForm.payment_status === "PAID" ? paymentForm.paid_date : "",
+    };
+
     setPaymentLoading(true);
 
     try {
-      const response = await api.post("/premium-payments", paymentForm);
+      let response;
 
+      if (editingPayment) {
+        response = await api.put(
+          `/premium-payments/${editingPayment.id}`,
+          paymentData,
+        );
+      } else {
+        response = await api.post("/premium-payments", paymentData);
+      }
       if (response.data.success) {
-        alert("Premium payment added successfully");
+        alert(
+          editingPaymentId
+            ? "Premium payment updated successfully"
+            : "Premium payment added successfully",
+        );
 
         setShowPaymentModal(false);
-
+        setEditingPayment(null);
         setPaymentForm({
           policy_id: "",
           amount: "",
@@ -105,29 +173,65 @@ function Premiums() {
   };
 
   // ---------------------------------------------------
+  // Delete Payment
+  // ---------------------------------------------------
+  const handleDeletePayment = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this payment?",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const response = await api.delete(`/premium-payments/${id}`);
+
+      if (response.data.success) {
+        alert("Premium payment deleted successfully");
+
+        fetchPayments();
+      }
+    } catch (err) {
+      console.error("Delete Payment Error:", err);
+
+      alert("Failed to delete premium payment");
+    }
+  };
+
+  // ---------------------------------------------------
+  // Edit Payment
+  // ---------------------------------------------------
+  const handleEditPayment = (payment) => {
+    setEditingPayment(payment);
+
+    setPaymentForm({
+      policy_id: payment.policy_id,
+      amount: payment.amount,
+      due_date: payment.due_date ? payment.due_date.split("T")[0] : "",
+      paid_date: payment.paid_date ? payment.paid_date.split("T")[0] : "",
+      payment_status: payment.payment_status || "PENDING",
+    });
+
+    setShowPaymentModal(true);
+  };
+  // ---------------------------------------------------
   // Search
   // ---------------------------------------------------
-  const filteredPremiums = premiums.filter((premium) => {
+  // ---------------------------------------------------
+  // Payment Search
+  // ---------------------------------------------------
+  const filteredPayments = payments.filter((payment) => {
     const search = searchTerm.toLowerCase();
 
     return (
-      premium.policy_number?.toLowerCase().includes(search) ||
-      premium.customer_name?.toLowerCase().includes(search) ||
-      premium.policy_type?.toLowerCase().includes(search)
+      payment.policy_number?.toLowerCase().includes(search) ||
+      payment.customer_name?.toLowerCase().includes(search) ||
+      payment.policy_type?.toLowerCase().includes(search)
     );
   });
 
   // ---------------------------------------------------
   // Statistics
   // ---------------------------------------------------
-  const totalPremium = premiums.reduce(
-    (total, premium) => total + Number(premium.premium_amount || 0),
-    0,
-  );
-
-  const activePremiums = premiums.filter(
-    (premium) => premium.status === "ACTIVE",
-  );
 
   return (
     <div className="premiums-page">
@@ -149,27 +253,27 @@ function Premiums() {
       {/* Summary Cards */}
       <div className="premium-summary-grid">
         <div className="premium-summary-card">
-          <span>Total Premiums</span>
+          <span>Total Premium Collected</span>
 
-          <strong>₹{totalPremium.toLocaleString("en-IN")}</strong>
+          <strong>₹{totalCollected.toLocaleString("en-IN")}</strong>
 
-          <small>All policy premiums</small>
+          <small>Successfully paid premiums</small>
         </div>
 
         <div className="premium-summary-card">
-          <span>Total Policies</span>
+          <span>Pending Payments</span>
 
-          <strong>{premiums.length}</strong>
+          <strong>{pendingPayments}</strong>
 
-          <small>Policies with premiums</small>
+          <small>Payments awaiting collection</small>
         </div>
 
         <div className="premium-summary-card">
-          <span>Active Policies</span>
+          <span>Overdue Payments</span>
 
-          <strong>{activePremiums.length}</strong>
+          <strong>{overduePayments}</strong>
 
-          <small>Currently active</small>
+          <small>Payments past due date</small>
         </div>
       </div>
 
@@ -181,7 +285,7 @@ function Premiums() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <span>{payments.length} payments</span>{" "}
+        <span>{filteredPayments.length} payments</span>{" "}
       </div>
 
       {/* Table */}
@@ -190,7 +294,7 @@ function Premiums() {
       <div className="premiums-card">
         {loading ? (
           <div className="premium-empty">Loading payment records...</div>
-        ) : payments.length === 0 ? (
+        ) : filteredPayments.length === 0 ? (
           <div className="premium-empty">No payment records found.</div>
         ) : (
           <div className="premiums-table-wrapper">
@@ -204,65 +308,65 @@ function Premiums() {
                   <th>Due Date</th>
                   <th>Paid Date</th>
                   <th>Payment Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {payments
-                  .filter((payment) => {
-                    const search = searchTerm.toLowerCase();
+                {filteredPayments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td>
+                      <strong>{payment.policy_number}</strong>
+                    </td>
 
-                    return (
-                      payment.policy_number?.toLowerCase().includes(search) ||
-                      payment.customer_name?.toLowerCase().includes(search) ||
-                      payment.policy_type?.toLowerCase().includes(search)
-                    );
-                  })
-                  .map((payment) => (
-                    <tr key={payment.id}>
-                      <td>
-                        <strong>{payment.policy_number}</strong>
-                      </td>
+                    <td>{payment.customer_name || "-"}</td>
 
-                      <td>{payment.customer_name || "-"}</td>
+                    <td>{payment.policy_type || "-"}</td>
 
-                      <td>{payment.policy_type || "-"}</td>
+                    <td>
+                      ₹{Number(payment.amount || 0).toLocaleString("en-IN")}
+                    </td>
 
-                      <td>
-                        ₹{Number(payment.amount || 0).toLocaleString("en-IN")}
-                      </td>
+                    <td>{formatDate(payment.due_date)}</td>
 
-                      <td>
-                        {payment.due_date
-                          ? new Date(payment.due_date).toLocaleDateString(
-                              "en-IN",
-                            )
-                          : "-"}
-                      </td>
+                    <td>{formatDate(payment.paid_date)}</td>
 
-                      <td>
-                        {payment.paid_date
-                          ? new Date(payment.paid_date).toLocaleDateString(
-                              "en-IN",
-                            )
-                          : "-"}
-                      </td>
+                    <td>
+                      {(() => {
+                        const status = getPaymentStatus(payment);
 
-                      <td>
-                        <span
-                          className={`payment-status ${
-                            payment.payment_status === "PAID"
-                              ? "paid"
-                              : payment.payment_status === "OVERDUE"
-                                ? "overdue"
-                                : "pending"
-                          }`}
-                        >
-                          {payment.payment_status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                        return (
+                          <span
+                            className={`payment-status ${
+                              status === "PAID"
+                                ? "paid"
+                                : status === "OVERDUE"
+                                  ? "overdue"
+                                  : "pending"
+                            }`}
+                          >
+                            {status}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                    <td>
+                      <button
+                        className="edit-payment-button"
+                        onClick={() => handleEditPayment(payment)}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="delete-payment-button"
+                        onClick={() => handleDeletePayment(payment.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -272,14 +376,25 @@ function Premiums() {
       {showPaymentModal && (
         <div
           className="payment-modal-overlay"
-          onClick={() => setShowPaymentModal(false)}
+          onClick={() => {
+            setShowPaymentModal(false);
+            setEditingPayment(null);
+          }}
         >
           <div className="payment-modal" onClick={(e) => e.stopPropagation()}>
             <div className="payment-modal-header">
               <div>
-                <h3>Add Premium Payment</h3>
+                <h3>
+                  {editingPayment
+                    ? "Edit Premium Payment"
+                    : "Add Premium Payment"}
+                </h3>
 
-                <p>Record a customer premium payment</p>
+                <p>
+                  {editingPayment
+                    ? "Update premium payment details"
+                    : "Record a customer premium payment"}
+                </p>
               </div>
 
               <button
@@ -402,7 +517,10 @@ function Premiums() {
                 <button
                   type="button"
                   className="cancel-payment-button"
-                  onClick={() => setShowPaymentModal(false)}
+                  onClick={() => {
+                    setShowPaymentModal(false);
+                    setEditingPayment(null);
+                  }}
                 >
                   Cancel
                 </button>
@@ -412,7 +530,11 @@ function Premiums() {
                   className="save-payment-button"
                   disabled={paymentLoading}
                 >
-                  {paymentLoading ? "Saving..." : "Save Payment"}
+                  {paymentLoading
+                    ? "Saving..."
+                    : editingPayment
+                      ? "Update Payment"
+                      : "Save Payment"}
                 </button>
               </div>
             </form>

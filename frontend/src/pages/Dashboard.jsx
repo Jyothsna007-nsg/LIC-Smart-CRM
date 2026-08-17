@@ -2,19 +2,42 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import "./Dashboard.css";
 
+const getPaymentStatus = (payment) => {
+  if (payment.payment_status === "PAID") {
+    return "PAID";
+  }
+
+  if (payment.payment_status === "PENDING" && payment.due_date) {
+    const today = new Date();
+    const dueDate = new Date(payment.due_date);
+
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+
+    if (dueDate < today) {
+      return "OVERDUE";
+    }
+  }
+
+  return payment.payment_status || "PENDING";
+};
+
 function Dashboard() {
   const [stats, setStats] = useState({
     total_customers: 0,
     active_policies: 0,
     premium_this_month: 0,
     pending_premiums: 0,
+    overdue_payments: 0,
+    premium_collected: 0,
   });
 
   const [customers, setCustomers] = useState([]);
 
   const [policies, setPolicies] = useState([]);
   const [policiesLoading, setPoliciesLoading] = useState(true);
-
+  const [payments, setPayments] = useState([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [customersLoading, setCustomersLoading] = useState(true);
   const [error, setError] = useState("");
@@ -23,6 +46,7 @@ function Dashboard() {
     fetchDashboardStats();
     fetchRecentCustomers();
     fetchPolicies();
+    fetchPayments();
   }, []);
 
   const fetchDashboardStats = async () => {
@@ -65,6 +89,20 @@ function Dashboard() {
     }
   };
 
+  const fetchPayments = async () => {
+    try {
+      const response = await api.get("/premium-payments");
+
+      if (response.data.success) {
+        setPayments(response.data.data.slice(0, 5));
+      }
+    } catch (err) {
+      console.error("Recent Payments Error:", err);
+    } finally {
+      setPaymentsLoading(false);
+    }
+  };
+
   return (
     <div className="dashboard-page">
       {/* Welcome */}
@@ -102,10 +140,36 @@ function Dashboard() {
           <small>Based on policy start dates</small>
         </div>
 
-        <div className="stat-card">
+        <div
+          className="stat-card stat-card-clickable"
+          onClick={() => {
+            window.location.href = "/premiums";
+          }}
+        >
+          {" "}
           <span>Pending Premiums</span>
           <strong>{loading ? "..." : stats.pending_premiums}</strong>
-          <small>Requires attention</small>
+          <small>Awaiting premium collection</small>{" "}
+        </div>
+        <div className="stat-card">
+          <span>Premium Collected</span>
+          <strong>
+            {loading
+              ? "..."
+              : `₹${Number(stats.premium_collected || 0).toLocaleString("en-IN")}`}
+          </strong>
+          <small>Total paid premium amount</small>
+        </div>
+        <div
+          className="stat-card stat-card-clickable"
+          onClick={() => {
+            window.location.href = "/premiums";
+          }}
+        >
+          {" "}
+          <span>Overdue Payments</span>
+          <strong>{loading ? "..." : stats.overdue_payments}</strong>
+          <small>Payments past due date</small>
         </div>
       </div>
 
@@ -343,6 +407,87 @@ function Dashboard() {
                             "en-IN",
                           )
                         : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      {/* Recent Premium Payments */}
+      <div className="recent-payments">
+        <div className="section-header">
+          <div>
+            <h3>Recent Premium Payments</h3>
+            <p>Latest premium payment activity</p>
+          </div>
+
+          <button
+            className="view-all-button"
+            onClick={() => {
+              window.location.href = "/premiums";
+            }}
+          >
+            View All
+          </button>
+        </div>
+
+        {paymentsLoading ? (
+          <div className="empty-state">Loading payments...</div>
+        ) : payments.length === 0 ? (
+          <div className="empty-state">No payment records found.</div>
+        ) : (
+          <div className="payment-table-wrapper">
+            <table className="payment-table">
+              <thead>
+                <tr>
+                  <th>Policy Number</th>
+                  <th>Customer</th>
+                  <th>Amount</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {payments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td>
+                      <strong className="policy-number">
+                        {payment.policy_number}
+                      </strong>
+                    </td>
+
+                    <td>{payment.customer_name || "-"}</td>
+
+                    <td>
+                      ₹{Number(payment.amount || 0).toLocaleString("en-IN")}
+                    </td>
+
+                    <td>
+                      {payment.due_date
+                        ? new Date(payment.due_date).toLocaleDateString(
+                            "en-IN",
+                            {
+                              timeZone: "UTC",
+                            },
+                          )
+                        : "-"}
+                    </td>
+
+                    <td>
+                      <span
+                        className={`payment-status ${
+                          getPaymentStatus(payment) === "PAID"
+                            ? "paid"
+                            : getPaymentStatus(payment) === "OVERDUE"
+                              ? "overdue"
+                              : "pending"
+                        }`}
+                      >
+                        {getPaymentStatus(payment)}
+                      </span>
                     </td>
                   </tr>
                 ))}

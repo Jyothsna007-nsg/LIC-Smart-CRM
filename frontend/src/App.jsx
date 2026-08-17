@@ -8,13 +8,15 @@ import CustomerList from "./pages/CustomerList";
 import AddPolicy from "./pages/AddPolicy";
 import Policies from "./pages/Policies";
 import Premiums from "./pages/Premiums";
-
+import Login from "./pages/Login";
+import Reminders from "./pages/Reminders";
 import "./App.css";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
 
@@ -25,6 +27,7 @@ function App() {
           <Route path="/add-policy" element={<AddPolicy />} />
           <Route path="/policies" element={<Policies />} />
           <Route path="/premiums" element={<Premiums />} />
+          <Route path="/reminders" element={<Reminders />} />
         </Route>
       </Routes>
     </BrowserRouter>

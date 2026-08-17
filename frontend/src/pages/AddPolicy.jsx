@@ -35,8 +35,38 @@ function AddPolicy() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const policyNumber = formData.policy_number.trim();
+    const premiumAmount = Number(formData.premium_amount);
+
+    // Customer validation
+    if (!formData.customer_id) {
+      alert("Please select a customer");
+      return;
+    }
+
+    // Policy number validation
+    if (!policyNumber) {
+      alert("Please enter a policy number");
+      return;
+    }
+
+    if (!/^[A-Za-z0-9-]+$/.test(policyNumber)) {
+      alert("Policy number can contain only letters, numbers and hyphens");
+      return;
+    }
+
+    // Premium validation
+    if (!Number.isFinite(premiumAmount) || premiumAmount <= 0) {
+      alert("Premium amount must be greater than ₹0");
+      return;
+    }
+
     try {
-      await api.post("/policies", formData);
+      await api.post("/policies", {
+        ...formData,
+        policy_number: policyNumber,
+        premium_amount: premiumAmount,
+      });
 
       alert("Policy added successfully!");
 
@@ -47,11 +77,17 @@ function AddPolicy() {
         premium_amount: "",
       });
     } catch (error) {
-      console.error(error);
-      alert("Error adding policy");
+      console.error("Add Policy Error:", error);
+
+      const message = error.response?.data?.details || "";
+
+      if (message.toLowerCase().includes("duplicate")) {
+        alert("This policy number already exists");
+      } else {
+        alert("Error adding policy");
+      }
     }
   };
-
   return (
     <div className="policy-page">
       <div className="policy-header">
@@ -96,6 +132,7 @@ function AddPolicy() {
               placeholder="Enter policy number"
               value={formData.policy_number}
               onChange={handleChange}
+              maxLength="30"
               required
             />
           </div>
@@ -123,6 +160,8 @@ function AddPolicy() {
               placeholder="Enter premium amount"
               value={formData.premium_amount}
               onChange={handleChange}
+              min="1"
+              step="0.01"
               required
             />
           </div>

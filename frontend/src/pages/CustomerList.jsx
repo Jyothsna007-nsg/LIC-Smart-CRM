@@ -8,7 +8,13 @@ function CustomerList() {
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerPolicies, setCustomerPolicies] = useState([]);
+  const [editingCustomer, setEditingCustomer] = useState(null);
 
+  const [editForm, setEditForm] = useState({
+    name: "",
+    phone: "",
+    email: "",
+  });
   useEffect(() => {
     fetchCustomers();
   }, []);
@@ -45,6 +51,32 @@ function CustomerList() {
     }
   };
 
+  const editCustomer = (customer) => {
+    setEditingCustomer(customer);
+
+    setEditForm({
+      name: customer.name || "",
+      phone: customer.phone || "",
+      email: customer.email || "",
+    });
+  };
+
+  const updateCustomer = async (e) => {
+    e.preventDefault();
+
+    try {
+      await api.put(`/customers/${editingCustomer.id}`, editForm);
+
+      alert("Customer updated successfully");
+
+      setEditingCustomer(null);
+
+      fetchCustomers();
+    } catch (error) {
+      console.error("Update Customer Error:", error);
+      alert("Failed to update customer");
+    }
+  };
   const deleteCustomer = async (id) => {
     if (window.confirm("Delete this customer?")) {
       try {
@@ -145,6 +177,13 @@ function CustomerList() {
                         </button>
 
                         <button
+                          className="edit-btn"
+                          onClick={() => editCustomer(customer)}
+                        >
+                          Edit
+                        </button>
+
+                        <button
                           className="delete-btn"
                           onClick={() => deleteCustomer(customer.id)}
                         >
@@ -168,6 +207,88 @@ function CustomerList() {
                   onClose={() => setSelectedCustomer(null)}
                   onDeletePolicy={deletePolicy}
                 />
+              )}
+              {editingCustomer && (
+                <div className="edit-modal-overlay">
+                  <div className="edit-modal">
+                    <div className="edit-modal-header">
+                      <div>
+                        <h2>Edit Customer</h2>
+                        <p>Update customer information</p>
+                      </div>
+
+                      <button
+                        className="close-edit-modal"
+                        onClick={() => setEditingCustomer(null)}
+                      >
+                        ×
+                      </button>
+                    </div>
+
+                    <form
+                      onSubmit={updateCustomer}
+                      className="edit-customer-form"
+                    >
+                      <div className="form-group">
+                        <label>Customer Name</label>
+
+                        <input
+                          type="text"
+                          value={editForm.name}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              name: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Phone Number</label>
+
+                        <input
+                          type="text"
+                          value={editForm.phone}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              phone: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label>Email Address</label>
+
+                        <input
+                          type="email"
+                          value={editForm.email}
+                          onChange={(e) =>
+                            setEditForm({
+                              ...editForm,
+                              email: e.target.value,
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="edit-modal-footer">
+                        <button
+                          type="button"
+                          onClick={() => setEditingCustomer(null)}
+                        >
+                          Cancel
+                        </button>
+
+                        <button type="submit">Save Changes</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
               )}
             </tbody>
           </table>
